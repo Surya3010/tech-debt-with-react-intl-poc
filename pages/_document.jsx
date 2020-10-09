@@ -1,4 +1,4 @@
-
+import React from 'react'
 import Document, { Head, Main, NextScript } from 'next/document'
 
 // The document (which is SSR-only) needs to be customized to expose the locale
@@ -21,11 +21,11 @@ export default class IntlDocument extends Document {
     const polyfill = `https://cdn.polyfill.io/v3/polyfill.min.js?features=Intl.~locale.${this.props.locale}`
 
     return (
-      <html>
+      <html lang="en">
         <Head />
         <body>
           <Main />
-          <script src={polyfill} />
+          <script defer src={polyfill} />
           <script
             dangerouslySetInnerHTML={{
               __html: this.props.localeDataScript,

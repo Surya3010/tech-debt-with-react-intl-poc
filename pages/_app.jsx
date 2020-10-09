@@ -1,4 +1,9 @@
 import { createIntl, createIntlCache, RawIntlProvider } from 'react-intl'
+import React from 'react'
+import App from 'next/app'
+import en from '../lang/en.json'
+import fr from '../lang/fr.json'
+
 
 // This is optional but highly recommended
 // since it prevents memory leak
@@ -8,49 +13,45 @@ function getMessages(language) {
   let langBundle;
   switch (language) {
     case 'fr':
-      langBundle = import('../lang/fr.json');
+      langBundle = fr;
       break;
     case 'en':
-      langBundle = import('../lang/en.json');
+      langBundle = en;
       break;
     default:
-      langBundle = import('../lang/en.json');
+      langBundle = en;
       break;
     // Add more languages
   }
   return langBundle
 }
 
-
-function MyApp({ Component, pageProps }) {
-  const locale = typeof window !== 'undefined' && sessionStorage && sessionStorage.getItem("Language") ? sessionStorage.getItem("Language") : 'en';
-  const messages = getMessages(locale);
-  const intl = createIntl(
-    {
-      locale,
-      messages,
-    },
-    cache
-  )
-  return (
-    <RawIntlProvider value={intl}>
-      <Component {...pageProps} />
-    </RawIntlProvider>
-  )
-}
-
-MyApp.getInitialProps = async ({ Component, ctx }) => {
-  let pageProps = {}
-
-  const { req } = ctx
-  // const locale = req?.locale ?? 'en'
-  // const messages = req?.messages ?? {}
-
-  if (Component.getInitialProps) {
-    Object.assign(pageProps, await Component.getInitialProps(ctx))
+class MyApp extends App {
+  static async getInitialProps({ Component, ctx }) {
+    let pageProps = {}
+    if (Component.getInitialProps) {
+      pageProps = await Component.getInitialProps({ ctx })
+    }
+    return { pageProps }
+  }
+  render() {
+    const { Component, pageProps } = this.props
+    const locale = typeof window !== 'undefined' && sessionStorage && sessionStorage.getItem("Language") ? sessionStorage.getItem("Language") : 'en';
+    const messages = getMessages(locale);
+    const intl = createIntl(
+      {
+        locale,
+        messages,
+      },
+      cache
+    )
+    return (
+      <RawIntlProvider value={intl}>
+        <Component {...pageProps} />
+      </RawIntlProvider>
+    )
   }
 
-  return { pageProps }
 }
 
 export default MyApp
